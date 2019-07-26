@@ -17,4 +17,15 @@ public class UserEntity implements Serializable {
     private String name;
     private String age;
     private Date createTime;
+
+    @Override
+    public String toString() {
+        return "UserEntity{" +
+                "id=" + id +
+                ", guid='" + guid + '\'' +
+                ", name='" + name + '\'' +
+                ", age='" + age + '\'' +
+                ", createTime=" + createTime +
+                '}';
+    }
 }
