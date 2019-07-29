@@ -5,10 +5,13 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
 import springbootredis.demo.Entity.UserEntity;
 import springbootredis.demo.util.RedisUtil;
 
 import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 import java.util.Date;
 
 /**
@@ -87,6 +90,30 @@ public class RedisController {
         } catch (Exception e) {
             return false;
         }
+    }
+
+    /**
+     *http://localhost:8080/redis/setSessionId
+     * 设置缓存
+    */
+    @GetMapping("/setSessionId")
+    @ResponseBody
+    public String setredisResult(HttpServletRequest request){
+        HttpSession session = request.getSession();
+        session.setAttribute("sessionId","100");
+        return "设置ok...";
+    }
+
+    /**
+     *http://localhost:8080/redis/getSessionId
+     * 取缓存
+     */
+    @GetMapping("/getSessionId")
+    @ResponseBody
+    public String redisResult(HttpServletRequest request) {
+        HttpSession session = request.getSession();
+        String sessid = (String) session.getAttribute("sessionId");
+        return "sessionId:"+sessid;
     }
 
 }

@@ -11,6 +11,7 @@ import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.core.*;
 import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
+import org.springframework.session.data.redis.config.annotation.web.http.EnableRedisHttpSession;
 
 /**
  * @description:
@@ -19,6 +20,7 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
  **/
 @Configuration
 @EnableCaching //开启注解
+@EnableRedisHttpSession //提供Session支持
 public class RedisConfig extends CachingConfigurerSupport {
     /**
      * retemplate相关配置
