@@ -7,6 +7,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 import springbootredis.demo.util.RedisUtil;
 
+import java.util.Date;
+
+
 @RunWith(SpringRunner.class)
 @SpringBootTest
 public class DemoApplicationTests {
@@ -19,11 +22,14 @@ public class DemoApplicationTests {
     */
     @Test
     public void redis() {
-        String key = "redis";
-        Object object = String.valueOf(1);
-        redisUtil.set(key,object);
-        redisUtil.get(key);
-        redisUtil.del(key);
+        Date dataStart = new Date();
+        for (int i=0;i<10000;i++) {
+            String key = String.valueOf(i);
+            Object object = String.valueOf(1);
+            redisUtil.set(key, object);
+        }
+        Date dateEnd = new Date();
+        System.out.println(dataStart+"::"+dateEnd);
     }
 
 

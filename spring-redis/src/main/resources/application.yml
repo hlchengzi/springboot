@@ -2,10 +2,11 @@
 ################   redis 配置
 spring:
   redis:
+    #单机redis配置
 #    host: 192.168.241.245
 #    port: 6379
     timeout: 50
-    database: 1
+    database: 7
     #spring 2.1以下不支持lettuce 需要使用jedis
     lettuce:
       pool:
@@ -14,10 +15,15 @@ spring:
         max-wait: 1000
     #下面这个相当于redis主从
     cluster:
-      nodes: 127.0.0.0:6379 ,127.0.0.1:6379
+      nodes: 192.168.241.245:6379 ,192.168.241.246:6379
       #设置哨兵模式
     sentinel:
-      nodes: 127.0.0.0:6379 ,127.0.0.1:6379
+      nodes: 192.168.241.245:26379 ,192.168.241.246:26379
       master: mymaster
+  datasource:
+    url:  jdbc:mysql://127.0.0.1:3306/test?useSSL=false&autoReconnect=true&tinyInt1isBit=false&useUnicode=true&characterEncoding=utf8&serverTimezone=GMT%2B8&allowMultiQueries=true
+    username: root
+    password: 123456
+    driver-class-name: com.mysql.cj.jdbc.Driver
 server:
   port: 8080

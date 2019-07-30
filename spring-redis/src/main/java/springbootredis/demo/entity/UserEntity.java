@@ -1,4 +1,4 @@
-package springbootredis.demo.Entity;
+package springbootredis.demo.entity;
 
 import lombok.Data;
 
