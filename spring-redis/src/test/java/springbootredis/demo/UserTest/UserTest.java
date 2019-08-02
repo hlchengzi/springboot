@@ -7,8 +7,10 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 import springbootredis.demo.entity.User;
 import springbootredis.demo.service.IUserService;
+import springbootredis.demo.util.RedisLockUtil;
 import springbootredis.demo.util.RedisUtil;
 
+import javax.annotation.Resource;
 import java.util.Date;
 
 /**
@@ -24,6 +26,8 @@ public class UserTest {
     RedisUtil redisUtil;
     @Autowired
     IUserService iUserService;
+    @Autowired
+    RedisLockUtil redisLockUtil;
 
     @Test
     public void setUser(){
@@ -50,4 +54,21 @@ public class UserTest {
             redisUtil.set(String.valueOf(i),user);
         }
     }
+
+    public void drawRedPacket(long userId) {
+        String key = "draw.redpacket.userid:" + userId;
+
+        boolean lock = redisLockUtil.lock2(key, 60);
+        if (lock) {
+            try {
+                //领取操作
+            } finally {
+                //释放锁
+                redisLockUtil.unLock2(key);
+            }
+        } else {
+            new RuntimeException("重复领取奖励");
+        }
+    }
+
 }

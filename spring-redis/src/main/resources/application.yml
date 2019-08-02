@@ -6,7 +6,7 @@ spring:
 #    host: 192.168.241.245
 #    port: 6379
     timeout: 50
-    database: 7
+    database: 6
     #spring 2.1以下不支持lettuce 需要使用jedis
     lettuce:
       pool:

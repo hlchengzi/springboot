@@ -11,8 +11,12 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import springbootredis.demo.constants.DataEnum;
+import springbootredis.demo.constants.ResponseBean;
 import springbootredis.demo.entity.User;
 import springbootredis.demo.service.IUserService;
+import springbootredis.demo.util.RedisLock;
+import springbootredis.demo.util.RedisLockUtil;
 import springbootredis.demo.util.RedisUtil;
 
 import javax.annotation.Resource;
@@ -32,6 +36,8 @@ public class UserController {
 
     @Resource
     RedisUtil redisUtil;
+    @Autowired
+    RedisLockUtil redisLockUtil;
 
     @Autowired
     IUserService iUserService;
@@ -85,6 +91,43 @@ public class UserController {
             e.printStackTrace();
             log.error("UserController selectById： {}", e.getMessage());
             return null;
+        }
+    }
+
+    /**
+     * http://localhost:8081/user/selectByIdLocked
+     * 基于redis分布式锁的实现
+     * @param userId
+     * @return
+     */
+    @GetMapping("/selectByIdLocked")
+    @ResponseBody
+    public ResponseBean<User> selectByIdLocked(@RequestParam  Long userId){
+        String key = "draw.redpacket.userid:" + userId;
+
+        boolean lock = redisLockUtil.lock2(key, 60);
+        if (lock) {
+            try {
+                Object object = redisUtil.get(String.valueOf(userId));
+                if(ObjectUtils.isEmpty(object)){
+                    User user = iUserService.getById(userId);
+                    if(ObjectUtils.isEmpty(user)){
+                        return new ResponseBean<>(DataEnum.USER_IS_NOT_EXIST,null);
+                    }else {
+                        redisUtil.set(String.valueOf(userId), user);
+                        return new ResponseBean<>(DataEnum.ORIGIN_MYSQL, user);
+                    }
+                }
+                return new ResponseBean<>(DataEnum.ORIGIN_REDIS,(User)object);
+                //领取操作,
+            }
+            finally {
+                //释放锁
+                redisLockUtil.unLock1(key);
+            }
+        } else {
+            return new ResponseBean<>(DataEnum.RUN_TIME_EXCEPTION,null);
+           // new RuntimeException("重复领取奖励");
         }
     }
 }

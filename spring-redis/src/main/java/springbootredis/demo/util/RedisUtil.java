@@ -1,13 +1,18 @@
 package springbootredis.demo.util;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataAccessException;
+import org.springframework.data.redis.connection.RedisConnection;
+import org.springframework.data.redis.core.RedisCallback;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.serializer.RedisSerializer;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
+import redis.clients.jedis.Protocol;
+import redis.clients.util.SafeEncoder;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.io.Serializable;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -535,6 +540,146 @@ public class RedisUtil {
                 return 0;
             }
         }
+
+    /**
+     * 监控数据库键
+     * @param key 键
+     */
+    public void watch(String key){
+            try {
+                redisTemplate.watch(key);
+
+            }catch (Exception e){
+                e.printStackTrace();
+            }
+    }
+
+    /**
+     * 批量监控数据库键
+     * @param keys 键
+     */
+    public void watch(Collection<String> keys){
+        try {
+            redisTemplate.watch(keys);
+
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * 移除对数据库的键监视
+     */
+    public void unWatch(){
+        try {
+            redisTemplate.unwatch();
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     *  在键不存在的情况下，才会set已存在，则不会做任何命令
+     *  键 key 的值设置为 value ， 并将键 key 的生存时间设置为 seconds 秒钟
+     * @param key 键
+     * @param value 值
+     * @param exptime 时间
+     * @return
+     */
+    public Boolean setnex(final String key, final Serializable value, final long exptime){
+        try {
+            Boolean b = (Boolean) redisTemplate.execute(new RedisCallback<Boolean>() {
+                @Override
+                public Boolean doInRedis(RedisConnection connection) throws DataAccessException {
+                    RedisSerializer valueSerializer = redisTemplate.getValueSerializer();
+                    RedisSerializer keySerializer = redisTemplate.getKeySerializer();
+                    Object obj = connection.execute("set", keySerializer.serialize(key),
+                            valueSerializer.serialize(value),
+                            SafeEncoder.encode("NX"),
+                            SafeEncoder.encode("EX"),
+                            Protocol.toByteArray(exptime));
+                    return obj != null;
+                }
+            });
+            return b;
+        }catch (Exception e){
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    /**
+    *设置 key对应的值为 string类型的 value。
+     * 如果key 已经存在，返回 0。如果不存在，则设置键值，并返回1
+     * 改操作是原子操作
+    */
+    public Boolean setnx(final String key, final Serializable value){
+        try {
+            Boolean b = (Boolean) redisTemplate.execute(new RedisCallback<Boolean>() {
+                @Override
+                public Boolean doInRedis(RedisConnection connection) throws DataAccessException {
+                    RedisSerializer valueSerializer = redisTemplate.getValueSerializer();
+                    RedisSerializer keySerializer = redisTemplate.getKeySerializer();
+                    Object obj = connection.execute("set", keySerializer.serialize(key),
+                            valueSerializer.serialize(value),
+                            SafeEncoder.encode("NX"));
+                    return obj != null;
+                }
+            });
+            return b;
+        }catch (Exception e){
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    /**
+    *设置key 对应的值为 string 类型的 value，并指定此键值对应的有效期。
+    */
+    public Boolean setex(final String key, final Serializable value, final long exptime){
+        try {
+            Boolean b = (Boolean) redisTemplate.execute(new RedisCallback<Boolean>() {
+                @Override
+                public Boolean doInRedis(RedisConnection connection) throws DataAccessException {
+                    RedisSerializer valueSerializer = redisTemplate.getValueSerializer();
+                    RedisSerializer keySerializer = redisTemplate.getKeySerializer();
+                    Object obj = connection.execute("set", keySerializer.serialize(key),
+                            valueSerializer.serialize(value),
+                            SafeEncoder.encode("EX"),
+                            Protocol.toByteArray(exptime));
+                    return obj != null;
+                }
+            });
+            return b;
+        }catch (Exception e){
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    /**
+     * 实现get set方法： 命令用于设置指定 key 的值，并返回 key 的旧值
+     * @param key
+     * @param value
+     * @return
+     */
+    public String getSet(final String key, final String value) {
+        if (redisTemplate != null) {
+            byte[] bytes = redisTemplate.execute(new RedisCallback<byte[]>() {
+                @Override
+                public byte[] doInRedis(RedisConnection connection)
+                        throws DataAccessException {
+                    RedisSerializer<String> serializer = redisTemplate.getStringSerializer();
+                    byte[] keys = serializer.serialize(key);
+                    byte[] values = serializer.serialize(value);
+                    return connection.getSet(keys, values);
+                }
+            });
+            return Base64.getEncoder().encodeToString(bytes);
+        }
+        return null;
+    }
+
 
 }
 
