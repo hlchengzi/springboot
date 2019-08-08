@@ -1,0 +1,22 @@
+spring:
+  activemq:
+    broker-url: tcp://192.168.241.109:61616
+    in-memory: true
+    #non-blocking-redelivery: true
+    pool:
+      #block-if-full: true
+      #block-if-full-timeout: -1
+      #create-connection-on-startup: true
+      enabled: false   #是否用Pooledconnectionfactory代替普通的ConnectionFactory
+      #expiry-timeout: 0
+      #idle-timeout: 30000
+      #max-connections: 5
+      #maximum-active-session-per-connection: 500
+      #reconnect-on-exception: true
+      #time-between-expiration-check: -1
+      #use-anonymous-producers: true
+      send-timeout: 100
+      user: admin
+      password: admin
+server:
+  port: 8004
