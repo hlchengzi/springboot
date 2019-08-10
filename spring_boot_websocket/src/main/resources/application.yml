@@ -1,0 +1,16 @@
+logging:
+  path: /Users/niuyy/logs/websocket
+spring:
+  thymeleaf:
+    mode: HTML
+    #关闭缓存
+    cache: false
+    #视图存放路径
+    prefix: classpath:/templates/
+    #文件后缀
+    suffix: .html
+    encoding: UTF-8
+    servlet:
+      content-type: text/html
+server:
+  port: 8007
